@@ -8,22 +8,35 @@ class Element {
         this.sorthead = sorthead
     }
 
+    isNode() {
+        if (this.node === 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     render() {
         const parent = this.head === null ? '.container_list' : `#element_${this.head}`,
               container = document.querySelector(parent),
               element = document.createElement('li'),
               price = `<span class="price">Цена: ${this.price}</span>`;
+              const listEl = document.createElement('ul');
+
 
         if(this.head === null) {
             container.append(element);
-        } else {
-            const listEl = document.createElement('ul');
+        } else if (this.isNode()) {
             container.append(listEl);
+            listEl.append(element);
+        } else {
             listEl.append(element);
         }
 
         element.id = `element_${this.id}`
         element.innerHTML = `<a class="element_name" href="#">${this.name}</a> ${this.price == 0 ? '' : price}`;
+
+        return element;
     }
 }
 
@@ -57,7 +70,10 @@ function parseData(data) {
     console.log(data.services);
 
     data.services.forEach(item => {
-        new Element(item.id, item.head, item.name, item.node, item.price, item.sorthead).render();
+        const element = new Element(item.id, item.head, item.name, item.node, item.price, item.sorthead),
+              elementDom = element.render();
+        console.log(elementDom);
+        
     });
 
 }
