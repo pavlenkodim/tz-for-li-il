@@ -17,24 +17,31 @@ class Element {
     }
 
     render() {
-        const parent = this.head === null ? '.container_list' : `#element_${this.head}`,
-              container = document.querySelector(parent),
-              element = document.createElement('li'),
-              price = `<span class="price">Цена: ${this.price}</span>`;
-              const listEl = document.createElement('ul');
-
-
-        if(this.head === null) {
-            container.append(element);
-        } else if (this.isNode()) {
-            container.append(listEl);
-            listEl.append(element);
+        let parent = ''
+        if (this.head === null) {
+            parent = '.container_list';
         } else {
-            listEl.append(element);
+            parent = `#node_${this.head}`
         }
 
-        element.id = `element_${this.id}`
-        element.innerHTML = `<a class="element_name" href="#">${this.name}</a> ${this.price == 0 ? '' : price}`;
+        const container = document.querySelector(parent);
+        if (!container) {
+            return false;
+        }
+
+        const element = document.createElement('li'),
+              price = `<span class="price">Цена: ${this.price}</span>`;
+              element.id = `element_${this.id}`
+              element.innerHTML = `<a class="element_name" href="#">${this.name}</a> ${this.price == 0 ? '' : price}`;
+
+        if (this.isNode()) {
+            const listEl = document.createElement('ul');
+            listEl.id = `node_${this.id}`;
+            container.append(element);
+            container.append(listEl);
+        } else {
+            container.append(element);
+        }
 
         return element;
     }
@@ -56,27 +63,34 @@ async function main (url) {
 }
 
 function sorting (data) {
-    for (let i = 0; i < data.length; i++) {
-        for (let j = 0; j < data.length - 1; j++) {
-            if (data[j].sorthead > data[j + 1].sorthead) {
-                [data[j], data[j + 1]] = [data[j + 1], data[j]];
+    for (let i = 0; i < data.services.length; i++) {
+        for (let j = 0; j < data.services.length - 1; j++) {
+            if (data.services[j].sorthead > data.services[j + 1].sorthead) {
+                [data.services[j], data.services[j + 1]] = [data.services[j + 1], data.services[j]];
             }
         }
-      }
+    }
+
+    parseData(data);
 }
 
 function parseData(data) {
-    sorting(data.services);
-    console.log(data.services);
 
-    data.services.forEach(item => {
-        const element = new Element(item.id, item.head, item.name, item.node, item.price, item.sorthead),
-              elementDom = element.render();
-        console.log(elementDom);
-        
-    });
+    for (let i = 0; i < data.services.length; i++) {
+        const onPage = document.querySelector(`#element_${data.services[i].id}`);
 
+        if (onPage) {
+            continue;
+        } else {
+            if (data.services[i].node === 1) {
+                new Element(data.services[i].id, data.services[i].head, data.services[i].name, data.services[i].node, data.services[i].price, data.services[i].sorthead).render();
+                parseData(data);
+            } else {
+                new Element(data.services[i].id, data.services[i].head, data.services[i].name, data.services[i].node, data.services[i].price, data.services[i].sorthead).render();
+            }
+        }
+    }
 }
 
 main('./data.json')
-.then(parseData);
+.then(sorting);
